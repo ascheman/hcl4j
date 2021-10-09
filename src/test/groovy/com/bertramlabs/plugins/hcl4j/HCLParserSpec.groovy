@@ -750,4 +750,20 @@ resource "aws_instance" "bw-instance-1" {
 	results.resource["aws_instance"]["bw-instance-1"] != null
 
 	}
+
+	void "it should handle blocks with multiple identifiers"() {
+		given:
+
+		def hcl = '''
+resource xxx "images" {
+  default = "empty.jpg"
+}
+'''
+		HCLParser parser = new HCLParser();
+		when:
+		def results  = parser.parse(hcl)
+		println JsonOutput.prettyPrint(JsonOutput.toJson(results));
+		then:
+		results.resource.xxx.images.default == "empty.jpg"
+	}
 }
