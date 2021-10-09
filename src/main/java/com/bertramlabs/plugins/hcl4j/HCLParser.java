@@ -85,7 +85,7 @@ public class HCLParser {
 	 * @throws HCLParserException Any type of parsing errors are returned as this exception if the syntax is invalid.
 	 * @throws IOException In the event the reader is unable to pull from the input source this exception is thrown.
 	 */
-	public Map<String,Object> parse(File input, Boolean ignoreParserExceptions) throws HCLParserException, IOException, UnsupportedEncodingException {
+	public Map<String,Object> parse(File input, Boolean ignoreParserExceptions) throws HCLParserException, IOException {
 		return parse(input,"UTF-8",ignoreParserExceptions);
 	}
 
@@ -96,7 +96,7 @@ public class HCLParser {
 	 * @throws HCLParserException Any type of parsing errors are returned as this exception if the syntax is invalid.
 	 * @throws IOException In the event the reader is unable to pull from the input source this exception is thrown.
 	 */
-	public Map<String,Object> parse(File input) throws HCLParserException, IOException, UnsupportedEncodingException {
+	public Map<String,Object> parse(File input) throws HCLParserException, IOException {
 		return parse(input,"UTF-8",false);
 	}
 
@@ -249,21 +249,7 @@ public class HCLParser {
 	 * @throws IOException In the event the reader is unable to pull from the input source this exception is thrown.
 	 */
 	public Map<String,Object> parse(Reader reader, Boolean ignoreParserExceptions) throws HCLParserException, IOException {
-		HCLLexer lexer = new HCLLexer(reader);
-		ArrayList<Symbol> rootBlocks;
-
-		if(ignoreParserExceptions) {
-			try {
-				lexer.yylex();	
-			} catch(Exception ex) {
-				//TODO: Log the exception
-			}
-		} else {
-			lexer.yylex();
-		}
-		
-
-		rootBlocks = lexer.elementStack;
+		List<Symbol> rootBlocks = getRootBlocks(reader, ignoreParserExceptions);
 
 		//Time to parse the AST Tree into a Map
 		Map<String,Object> result = new LinkedHashMap<>();
@@ -275,6 +261,75 @@ public class HCLParser {
 
 		}
 		return result;
+	}
+
+	public HCLConfiguration parseConfiguration(File input) throws HCLParserException, IOException, UnsupportedEncodingException {
+		return parseConfiguration(input, "UTF-8");
+	}
+
+	public HCLConfiguration parseConfiguration(File input, String charsetName) throws HCLParserException, IOException {
+		return parseConfiguration(input, Charset.forName(charsetName));
+	}
+
+	public HCLConfiguration parseConfiguration(File input, Charset cs) throws HCLParserException, IOException{
+		InputStream is = null;
+		try {
+			is = new FileInputStream(input);
+			return parseConfiguration(is,cs);
+		} finally {
+			if(is != null) {
+				is.close();
+			}
+		}
+	}
+
+	public HCLConfiguration parseConfiguration(InputStream input, Charset cs) throws HCLParserException, IOException {
+
+		InputStreamReader reader;
+		if(cs != null) {
+			reader = new InputStreamReader(input,cs);
+		} else {
+			reader = new InputStreamReader(input,"UTF-8");
+		}
+		return parseConfiguration(reader);
+	}
+
+	public HCLConfiguration parseConfiguration(Reader reader) throws HCLParserException,
+			IOException {
+		List<HCLBlock> blocks = new ArrayList<>();
+		final List<HCLAttribute> attributes = new ArrayList<>();
+
+		List<Symbol> rootBlocks = getRootBlocks(reader, false);
+		for (Symbol symbol : rootBlocks) {
+			if (symbol instanceof HCLAttribute) {
+				attributes.add((HCLAttribute) symbol);
+			} else if (symbol instanceof HCLBlock) {
+				blocks.add((HCLBlock) symbol);
+			} else {
+				throw new HCLParserException("The root blocks must only consist of Blocks and Attributes");
+			}
+		}
+
+		return new HCLConfiguration(blocks, attributes);
+	}
+
+	private List<Symbol> getRootBlocks(Reader reader, Boolean ignoreParserExceptions) throws IOException, HCLParserException {
+		HCLLexer lexer = new HCLLexer(reader);
+		ArrayList<Symbol> rootBlocks;
+
+		if(ignoreParserExceptions) {
+			try {
+				lexer.yylex();
+			} catch(Exception ex) {
+				//TODO: Log the exception
+			}
+		} else {
+			lexer.yylex();
+		}
+
+
+		rootBlocks = lexer.elementStack;
+		return rootBlocks;
 	}
 
 
