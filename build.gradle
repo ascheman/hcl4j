@@ -63,6 +63,25 @@ if (isReleaseVersion) {
 }
 
 publishing {
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots/"
+            if (project.hasProperty('mavenUser')) {
+                credentials {
+                    username mavenUser
+                    password mavenPassword
+                }
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+            metadataSources {
+                mavenPom()
+                artifact()
+                ignoreGradleMetadataRedirection()
+            }
+        }
+    }
     publications {
         maven(MavenPublication) {
             artifactId 'hcl4j'
