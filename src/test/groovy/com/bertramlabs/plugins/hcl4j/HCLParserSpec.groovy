@@ -189,9 +189,11 @@ variable {
 	typeString = string
 	typeNumber = number
 	typeBoolean = boolean
-	typeMap = map
+	typeMap = map(number)
 	typeList = list
 	typeListString = list(string)
+	typeSetNumber = set(number)
+	typeMapListString = map(list(string))
 }
 		'''
 				HCLParser parser = new HCLParser();
@@ -203,7 +205,59 @@ variable {
 		results.variable.typeList instanceof ListPrimitiveType
 		results.variable.typeListString instanceof ListPrimitiveType
 		results.variable.typeListString.subType instanceof StringPrimitiveType
+		results.variable.typeSetNumber instanceof SetPrimitiveType
+		results.variable.typeMap instanceof MapPrimitiveType
+		results.variable.typeMapListString instanceof MapPrimitiveType
+		results.variable.typeMapListString.subType instanceof ListPrimitiveType
+		results.variable.typeMapListString.subType.subType instanceof StringPrimitiveType
 	}
+
+
+	void "should handle multiple list types"() {
+		given:
+		def hcl = '''
+variable "container_subnet_ids" {
+type = list(string)
+default = ["subnet-72b9162b"]
+}
+
+
+
+variable "yellow_subnet_ids" {
+type = list(string)
+default = ["subnet-72b9162b"]
+}
+'''
+				HCLParser parser = new HCLParser();
+		when:
+		def results  = parser.parse(hcl)
+		then:
+		results.containsKey('variable') == true
+		results.variable.yellow_subnet_ids.type  instanceof ListPrimitiveType
+		results.variable.yellow_subnet_ids['default'].size() == 1
+	}
+
+
+	void "should handle method in interpolation syntax"() {
+		given:
+		def hcl = '''
+		resource "aws_instance" "test" {
+			tags {
+			Author = "Effectual Terraform script"
+			Date ="${timestamp()}"
+			}			
+		}
+'''
+ 		HCLParser parser = new HCLParser();
+ 		when:
+ 		def results = parser.parse(hcl)
+ 		then:
+ 		results.resource.aws_instance.test.tags.Date == '${timestamp()}'
+ 		
+	}
+
+
+
 
 
 	void "should handle interpolation syntax"() {

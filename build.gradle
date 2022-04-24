@@ -29,7 +29,7 @@ ext {
 
 
 group = 'net.aschemann.iac'
-version = '0.4.1-SNAPSHOT'
+version = '0.4.4-SNAPSHOT'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 sourceCompatibility = '1.7'

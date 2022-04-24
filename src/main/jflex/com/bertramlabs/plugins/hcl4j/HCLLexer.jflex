@@ -53,7 +53,8 @@ HCLParserException
   Boolean inMap = false;
   Boolean fromMapKey = false;
   HCLAttribute attribute;
-  ListPrimitiveType listPrimitiveType;
+  SubTypePrimitiveType subTypePrimitiveType;
+  Integer primitiveDepth = 0;
 
   Symbol currentBlock = null;
   private Symbol hclBlock(List<String> blockNames) {
@@ -193,9 +194,10 @@ Null = null
 
 StringPrimitive = string
 NumberPrimitive = number
-BooleanPrimitive = boolean
+BooleanPrimitive = bool
 ListPrimitive = list | list*\(
-MapPrimitive = map
+MapPrimitive = map | map*\(
+SetPrimitive = set | set*\(
 
 DigitValue = [0-9\.\-]+
 
@@ -260,7 +262,7 @@ AssignmentExpression = [^]
 %state FORLOOPEXPRESSION
 %state FORTUPLEEXPRESSION
 %state FOROBJECTEXPRESSION
-%state LISTPRIMITIVETYPE
+%state SUBTYPEPRIMITIVETYPE
 
 %%
 
@@ -389,8 +391,9 @@ AssignmentExpression = [^]
   {StringPrimitive}       { currentBlock.appendChild(new StringPrimitiveType(yyline,yycolumn,yychar)); exitAttribute();}
   {NumberPrimitive}       { currentBlock.appendChild(new NumberPrimitiveType(yyline,yycolumn,yychar)); exitAttribute();}
   {BooleanPrimitive}      { currentBlock.appendChild(new BooleanPrimitiveType(yyline,yycolumn,yychar)); exitAttribute();}
-  {ListPrimitive}         { listPrimitiveType = new ListPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(listPrimitiveType); yybegin(LISTPRIMITIVETYPE); }
-  {MapPrimitive}          { currentBlock.appendChild(new MapPrimitiveType(yyline,yycolumn,yychar)); exitAttribute();}
+  {ListPrimitive}         { subTypePrimitiveType = new ListPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
+  {SetPrimitive}         { subTypePrimitiveType = new SetPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
+  {MapPrimitive}         { subTypePrimitiveType = new MapPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
   {EvaluatedExpression}          { startEvalExpression(); }
   {Comment}                      { /* ignore */ }
   {WhiteSpace}                   { /* ignore */ }
@@ -427,14 +430,16 @@ AssignmentExpression = [^]
   [^}\n]+                        { /* ignore */ }
 }
 
-<LISTPRIMITIVETYPE> {
-  \(                             { /* ignore for now */ }
-  \)                             { exitAttribute(); }
-  {LineTerminator}               { exitAttribute(); }
-  {StringPrimitive}              { listPrimitiveType.subType = new StringPrimitiveType(yyline,yycolumn,yychar); listPrimitiveType = null;}
-  {NumberPrimitive}              { listPrimitiveType.subType = new NumberPrimitiveType(yyline,yycolumn,yychar); listPrimitiveType = null;}
-  {BooleanPrimitive}             { listPrimitiveType.subType = new BooleanPrimitiveType(yyline,yycolumn,yychar); listPrimitiveType = null;}
-  {MapPrimitive}                 { listPrimitiveType.subType = new MapPrimitiveType(yyline,yycolumn,yychar); listPrimitiveType = null;}
+<SUBTYPEPRIMITIVETYPE> {
+  \(                             { primitiveDepth++ ; }
+  \)                             { primitiveDepth--; if(primitiveDepth == 0) {subTypePrimitiveType = null; exitAttribute();} }
+  {LineTerminator}               { subTypePrimitiveType = null; exitAttribute(); }
+  {StringPrimitive}              { subTypePrimitiveType.subType = new StringPrimitiveType(yyline,yycolumn,yychar); subTypePrimitiveType = null;}
+  {NumberPrimitive}              { subTypePrimitiveType.subType = new NumberPrimitiveType(yyline,yycolumn,yychar); subTypePrimitiveType = null;}
+  {BooleanPrimitive}             { subTypePrimitiveType.subType = new BooleanPrimitiveType(yyline,yycolumn,yychar); subTypePrimitiveType = null;}
+  {MapPrimitive}                 { MapPrimitiveType tmpPrimitive = new MapPrimitiveType(null,yyline,yycolumn,yychar); subTypePrimitiveType.subType = tmpPrimitive; subTypePrimitiveType = tmpPrimitive;}
+  {ListPrimitive}                 { ListPrimitiveType tmpPrimitive = new ListPrimitiveType(null,yyline,yycolumn,yychar); subTypePrimitiveType.subType = tmpPrimitive; subTypePrimitiveType = tmpPrimitive;}
+  {SetPrimitive}                 { SetPrimitiveType tmpPrimitive = new SetPrimitiveType(null,yyline,yycolumn,yychar); subTypePrimitiveType.subType = tmpPrimitive; subTypePrimitiveType = tmpPrimitive;}
   {Comment}                      { /* ignore */ }
   {WhiteSpace}                   { /* ignore */ }
 }
