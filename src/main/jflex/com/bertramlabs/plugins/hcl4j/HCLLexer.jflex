@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
   Symbol currentBlock = null;
   private Symbol hclBlock(List<String> blockNames) {
-    debug("Block", "Start");
+    debug("Block", "Start", "blockNames = '{}'", blockNames);
     HCLBlock block = new HCLBlock(blockNames,currentBlock,yyline,yycolumn-1,yychar-1);
     if(currentBlock == null) {
       elementStack.add(block);
@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private Symbol exitBlock() {
-    debug("Block", "Leave");
+    debug("Block", "Leave", "currentBlock = '{}'", currentBlock);
     Symbol result = null;
     if(currentBlock != null) {
       if(currentBlock.getParent() == null) {
@@ -85,7 +85,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private void startAttribute(String name) {
-    debug("Attribute", "Start");
+    debug("Attribute", "Start", "name = '{}'", name);
 
     HCLAttribute currentAttribute = new HCLAttribute(name,yyline,yycolumn,yychar);
     if(currentBlock == null) {
@@ -120,7 +120,7 @@ import org.slf4j.LoggerFactory;
 
 
   private Symbol exitAttribute(Boolean force) {
-    debug("Attribute", "Leave");
+    debug("Attribute", "Leave", "currentBlock = '{}'", currentBlock);
 
     if(currentBlock == null) {
       yybegin(YYINITIAL);
@@ -163,7 +163,7 @@ import org.slf4j.LoggerFactory;
 
   private void debug(final String context, final String operation, final String fmt, Object... values) {
       if (LOG.isDebugEnabled()) {
-          String extendedFormat = "{}.{} (Line #{}, Column #{})" + (fmt == null ? "" : fmt);
+          String extendedFormat = "{}.{} (Line #{}, Column #{})" + (fmt == null ? "" : ": " + fmt);
           LOG.debug(extendedFormat, context, operation, yyline, yycolumn, values);
       }
   }
