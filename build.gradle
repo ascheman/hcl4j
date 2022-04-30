@@ -90,11 +90,11 @@ publishing {
                     resolveStrategy = Closure.DELEGATE_FIRST
                     name 'hcl4j'
                     description 'Hashicorp Configuration Language (HCL) Java Parser'
-                    url 'https://github.com/bertramdev/hcl4j'
+                    url 'https://github.com/ascheman/hcl4j'
                     scm {
-                        url 'https://github.com/bertramdev/hcl4j'
-                        connection 'scm:https://bertramdev@github.com/bertramdev/hcl4j.git'
-                        developerConnection 'scm:git://github.com/bertramdev/hcl4j.git'
+                        url 'https://github.com/ascheman/hcl4j'
+                        connection 'scm:https://ascheman@github.com/ascheman/hcl4j.git'
+                        developerConnection 'scm:git://github.com/ascheman/hcl4j.git'
                     }
                     licenses {
                         license {
@@ -109,6 +109,11 @@ publishing {
                             name 'David Estes'
                             email 'davydotcom@gmail.com'
                         }
+                        developer {
+                            id 'ascheman'
+                            name 'Gerd Aschemann'
+                            email 'gerd@aschemann.net'
+                        }
                     }
                 }
             }
@@ -120,24 +125,6 @@ publishing {
         }
     }
 }
-
-
-//Define bintrayUser and bintrayKey in ~/.gradle/gradle.properties
-// bintray {
-//     if(project.hasProperty('bintrayUser')) {
-//         user = bintrayUser
-//         key = bintrayKey
-//     }
-//     publications = ['maven']
-//     pkg {
-//         repo = 'gomorpheus'
-//         userOrg = 'bertramlabs'
-//         name = 'hcl4j'
-//         vcsUrl = 'https://github.com/bertramdev/hcl4j.git'
-//         licenses = ['Apache-2.0']
-//     }
-// }
-
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'

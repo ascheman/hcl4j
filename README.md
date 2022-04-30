@@ -15,7 +15,7 @@ Using gradle one can include the hcl4j dependency like so:
 
 ```groovy
 dependencies {
-	compile "com.bertramlabs.plugins:hcl4j:0.4.0"
+	compile "net.aschemann.iac:hcl4j:0.4.4"
 }
 ```
 
