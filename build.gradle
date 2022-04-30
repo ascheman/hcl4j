@@ -67,6 +67,10 @@ publishing {
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots/"
             if (project.hasProperty('mavenUser')) {
+                logger.info "Using OSS Sonatype user '${mavenUser}' (by property 'mavenUser')"
+                if (!project.hasProperty('mavenPassword')) {
+                    throw new RuntimeException ("Please set project property 'mavenPassword'")
+                }
                 credentials {
                     username mavenUser
                     password mavenPassword
