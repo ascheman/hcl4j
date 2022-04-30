@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class GenericSymbol implements Symbol {
-	private static Logger LOG = LoggerFactory.getLogger(GenericSymbol.class);
+	private static final Logger LOG = LoggerFactory.getLogger(GenericSymbol.class);
 
 	private Integer line;
 	private Integer column;

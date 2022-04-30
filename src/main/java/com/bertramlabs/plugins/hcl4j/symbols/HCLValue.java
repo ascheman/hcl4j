@@ -15,6 +15,9 @@
  */
 package com.bertramlabs.plugins.hcl4j.symbols;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A Class representation of an attributes value. This could be a generic type like a "string", "number", "boolean", "array" (see {@link HCLArray}, or "map" (see {@link HCLMap}).
  * This is an internal parser lexer class and should not be needed externally.
@@ -24,6 +27,7 @@ public class HCLValue extends GenericSymbol {
 	public String type;
 	public Object value;
 	public HCLValue parent;
+	static final Logger LOG = LoggerFactory.getLogger(HCLValue.class);
 
 	public String getSymbolName() {
 		return "Value";
@@ -32,6 +36,8 @@ public class HCLValue extends GenericSymbol {
 
 	public HCLValue(String type, Object value, Integer line, Integer column,Long position) {
 		super("value",line,column,position);
+		LOG.debug ("Symbol type: '{}' / Value: '{}'", type, value);
+
 		this.type = type;
 		this.value = value;
 	}
