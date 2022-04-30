@@ -34,6 +34,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,7 +62,7 @@ public class HCLParser {
 
 
 	public HCLParser() {
-
+		// TODO document why this constructor is empty
 	}
 
 	/**
@@ -98,7 +99,7 @@ public class HCLParser {
 	 * @throws IOException In the event the reader is unable to pull from the input source this exception is thrown.
 	 */
 	public Map<String,Object> parse(File input, Boolean ignoreParserExceptions) throws HCLParserException, IOException {
-		return parse(input,"UTF-8",ignoreParserExceptions);
+		return parse(input, StandardCharsets.UTF_8.toString(),ignoreParserExceptions);
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class HCLParser {
 	 * @throws IOException In the event the reader is unable to pull from the input source this exception is thrown.
 	 */
 	public Map<String,Object> parse(File input) throws HCLParserException, IOException {
-		return parse(input,"UTF-8",false);
+		return parse(input, StandardCharsets.UTF_8.toString(),false);
 	}
 
 
@@ -123,14 +124,8 @@ public class HCLParser {
 	 * @throws IOException In the event the reader is unable to pull from the input source this exception is thrown.
 	 */
 	public Map<String,Object> parse(File input, Charset cs) throws HCLParserException, IOException{
-		InputStream is = null;
-		try {
-			is = new FileInputStream(input);
-			return parse(is,cs);
-		} finally {
-			if(is != null) {
-				is.close();
-			}
+		try (InputStream is = new FileInputStream(input)) {
+			return parse(is, cs);
 		}
 	}
 
@@ -159,14 +154,8 @@ public class HCLParser {
 	 * @throws UnsupportedEncodingException If the charset ( UTF-8 by default if unspecified) encoding is not supported
 	 */
 	public Map<String,Object> parse(File input, String charsetName, Boolean ignoreParserExceptions) throws HCLParserException, IOException {
-		InputStream is = null;
-		try {
-			is = new FileInputStream(input);
-			return parse(is,charsetName,ignoreParserExceptions);
-		} finally {
-			if(is != null) {
-				is.close();
-			}
+		try (InputStream is = new FileInputStream(input)) {
+			return parse(is, charsetName, ignoreParserExceptions);
 		}
 	}
 
@@ -199,7 +188,7 @@ public class HCLParser {
 		if(cs != null) {
 			reader = new InputStreamReader(input,cs);
 		} else {
-			reader = new InputStreamReader(input,"UTF-8");
+			reader = new InputStreamReader(input, StandardCharsets.UTF_8);
 		}
 		return parse(reader);
 	}
@@ -215,7 +204,7 @@ public class HCLParser {
 	 * @throws IOException In the event the reader is unable to pull from the input source this exception is thrown.
 	 * @throws UnsupportedEncodingException If the charset ( UTF-8 by default if unspecified) encoding is not supported.
 	 */
-	public Map<String,Object> parse(InputStream input, String charsetName) throws HCLParserException, IOException, UnsupportedEncodingException {
+	public Map<String,Object> parse(InputStream input, String charsetName) throws HCLParserException, IOException {
 		return parse(input,charsetName,false);
 	}
 
@@ -230,13 +219,13 @@ public class HCLParser {
 	 * @throws IOException In the event the reader is unable to pull from the input source this exception is thrown.
 	 * @throws UnsupportedEncodingException If the charset ( UTF-8 by default if unspecified) encoding is not supported.
 	 */
-	public Map<String,Object> parse(InputStream input, String charsetName, Boolean ignoreParserExceptions) throws HCLParserException, IOException, UnsupportedEncodingException {
+	public Map<String,Object> parse(InputStream input, String charsetName, Boolean ignoreParserExceptions) throws HCLParserException, IOException {
 
 		InputStreamReader reader;
 		if(charsetName != null) {
 			reader = new InputStreamReader(input,charsetName);
 		} else {
-			reader = new InputStreamReader(input,"UTF-8");
+			reader = new InputStreamReader(input,StandardCharsets.UTF_8.toString());
 		}
 		return parse(reader,ignoreParserExceptions);
 	}
@@ -266,16 +255,14 @@ public class HCLParser {
 		//Time to parse the AST Tree into a Map
 		Map<String,Object> result = new LinkedHashMap<>();
 
-		Map<String,Object> mapPosition = result;
-
 		for(Symbol currentElement : rootBlocks) {
-			processSymbol(currentElement,mapPosition);
+			processSymbol(currentElement, result);
 
 		}
 		return result;
 	}
 
-	public HCLConfiguration parseConfiguration(File input) throws HCLParserException, IOException, UnsupportedEncodingException {
+	public HCLConfiguration parseConfiguration(File input) throws HCLParserException, IOException {
 		return parseConfiguration(input, "UTF-8");
 	}
 
@@ -284,14 +271,8 @@ public class HCLParser {
 	}
 
 	public HCLConfiguration parseConfiguration(File input, Charset cs) throws HCLParserException, IOException{
-		InputStream is = null;
-		try {
-			is = new FileInputStream(input);
-			return parseConfiguration(is,cs);
-		} finally {
-			if(is != null) {
-				is.close();
-			}
+		try (InputStream is = new FileInputStream(input)) {
+			return parseConfiguration(is, cs);
 		}
 	}
 
@@ -301,7 +282,7 @@ public class HCLParser {
 		if(cs != null) {
 			reader = new InputStreamReader(input,cs);
 		} else {
-			reader = new InputStreamReader(input,"UTF-8");
+			reader = new InputStreamReader(input,StandardCharsets.UTF_8.toString());
 		}
 		return parseConfiguration(reader);
 	}
@@ -325,7 +306,8 @@ public class HCLParser {
 		return new HCLConfiguration(blocks, attributes);
 	}
 
-	private List<Symbol> getRootBlocks(Reader reader, Boolean ignoreParserExceptions) throws IOException, HCLParserException {
+	private List<Symbol> getRootBlocks(Reader reader, boolean ignoreParserExceptions) throws IOException,
+			HCLParserException {
 		HCLLexer lexer = new HCLLexer(reader);
 		List<Symbol> rootBlocks;
 
@@ -354,16 +336,16 @@ public class HCLParser {
 				if(mapPosition.containsKey(blockName)) {
 					if(counter == block.blockNames.size() - 1 && mapPosition.get(blockName) instanceof Map) {
 						List<Map<String,Object>> objectList = new ArrayList<>();
-						Map<String,Object> addedObject = new LinkedHashMap<String,Object>();
-						objectList.add((Map)mapPosition.get(blockName));
+						Map<String,Object> addedObject = new LinkedHashMap<>();
+						objectList.add((Map<String, Object>)mapPosition.get(blockName));
 						objectList.add(addedObject);
 						mapPosition.put(blockName,objectList);
 						mapPosition = addedObject;
 					} else if(mapPosition.get(blockName) instanceof Map) {
 						mapPosition = (Map<String,Object>) mapPosition.get(blockName);
 					} else if(counter == block.blockNames.size() - 1 && mapPosition.get(blockName) instanceof List) {
-						Map<String,Object> addedObject = new LinkedHashMap<String,Object>();
-						((List<Map>)mapPosition.get(blockName)).add(addedObject);
+						Map<String,Object> addedObject = new LinkedHashMap<>();
+						((List<Map<String,Object>>)mapPosition.get(blockName)).add(addedObject);
 						mapPosition = addedObject;
 					} else {
 						if(mapPosition.get(blockName) instanceof List) {
@@ -429,16 +411,15 @@ public class HCLParser {
 			return value.value;
 		} else if (value.type.equals("boolean")) {
 			if(value.value.equals("true")) {
-				return new Boolean(true);
+				return Boolean.TRUE;
 			} else {
-				return new Boolean(false);
+				return Boolean.FALSE;
 			}
 		} else if (value.type.equals("null")) {
 			return null;
 		} else if (value.type.equals("number")) {
 			try {
-				Double numericalValue = Double.parseDouble((String) (value.value));
-				return numericalValue;
+				return Double.parseDouble((String) (value.value));
 			} catch(NumberFormatException ex) {
 				throw new HCLParserException("Error Parsing Numerical Value in HCL Attribute ", ex);
 			}
@@ -449,7 +430,6 @@ public class HCLParser {
 
 
 	protected Object processEvaluation(EvalSymbol evalSymbol) {
-//		return null;
 		if(evalSymbol instanceof Variable) {
 			return evalSymbol;
 		} else {
