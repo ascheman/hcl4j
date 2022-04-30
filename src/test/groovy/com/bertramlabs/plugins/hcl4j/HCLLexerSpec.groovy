@@ -25,8 +25,6 @@ class HCLLexerSpec extends Specification {
 
 	void "should generate symbols from hcl"() {
 		given:
-		ArrayList<Symbol> rootBlocks = new ArrayList<Symbol>();
-		Symbol element;
 		def hcl = '''
 variables {
 test = "value"
@@ -42,11 +40,11 @@ service "myservice" {
   }
 }
 '''
-		StringReader reader = new StringReader(hcl);
-		HCLLexer lexer = new HCLLexer(reader);
+		StringReader reader = new StringReader(hcl)
+		HCLLexer lexer = new HCLLexer(reader)
 		when:
-		lexer.yylex();
-		rootBlocks = lexer.elementStack
+		lexer.yylex()
+		List<Symbol> rootBlocks = lexer.elementStack
 
 		println rootBlocks?.collect{[it.getSymbolName(),it.getName()]}
 		then:
