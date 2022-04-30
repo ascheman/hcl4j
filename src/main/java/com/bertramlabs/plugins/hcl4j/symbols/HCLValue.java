@@ -24,10 +24,10 @@ import org.slf4j.LoggerFactory;
  * @author David Estes
  */
 public class HCLValue extends GenericSymbol {
-	public String type;
-	public Object value;
-	public HCLValue parent;
 	static final Logger LOG = LoggerFactory.getLogger(HCLValue.class);
+
+	final private String type;
+	final private Object value;
 
 	public String getSymbolName() {
 		return "Value";
@@ -40,5 +40,13 @@ public class HCLValue extends GenericSymbol {
 
 		this.type = type;
 		this.value = value;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public Object getValue() {
+		return value;
 	}
 }

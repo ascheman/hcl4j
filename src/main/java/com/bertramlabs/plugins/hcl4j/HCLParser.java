@@ -407,19 +407,19 @@ public class HCLParser {
 
 
 	protected Object processValue(HCLValue value) throws HCLParserException {
-		if(value.type.equals("string")) {
-			return value.value;
-		} else if (value.type.equals("boolean")) {
-			if(value.value.equals("true")) {
+		if(value.getType().equals("string")) {
+			return value.getValue();
+		} else if (value.getType().equals("boolean")) {
+			if(value.getValue().equals("true")) {
 				return Boolean.TRUE;
 			} else {
 				return Boolean.FALSE;
 			}
-		} else if (value.type.equals("null")) {
+		} else if (value.getType().equals("null")) {
 			return null;
-		} else if (value.type.equals("number")) {
+		} else if (value.getType().equals("number")) {
 			try {
-				return Double.parseDouble((String) (value.value));
+				return Double.parseDouble((String) (value.getValue()));
 			} catch(NumberFormatException ex) {
 				throw new HCLParserException("Error Parsing Numerical Value in HCL Attribute ", ex);
 			}

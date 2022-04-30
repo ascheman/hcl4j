@@ -31,8 +31,8 @@ public abstract class GenericSymbol implements Symbol {
 
 	private String name;
 
-	private List<Symbol> children = new ArrayList<Symbol>();
-	private List<Symbol> attributes = new ArrayList<Symbol>();
+	private List<Symbol> children = new ArrayList<>();
+	private List<Symbol> attributes = new ArrayList<>();
 	private Symbol parent;
 
 	public String getName() {
@@ -87,11 +87,11 @@ public abstract class GenericSymbol implements Symbol {
 		attributes.add(symbol);
 	}
 
-	public GenericSymbol(String name) {
+	protected GenericSymbol(String name) {
 		this.name = name;
 	}
 
-	public GenericSymbol(String name,Integer line, Integer column,Long position) {
+	protected GenericSymbol(String name,Integer line, Integer column,Long position) {
 		LOG.debug("Create new Symbol: '{}'", name);
 
 		this.name = name;
