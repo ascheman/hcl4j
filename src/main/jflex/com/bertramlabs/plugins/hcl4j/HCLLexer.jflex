@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 package com.bertramlabs.plugins.hcl4j;
+
 import com.bertramlabs.plugins.hcl4j.symbols.*;
 import com.bertramlabs.plugins.hcl4j.RuntimeSymbols.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is an HCL lexer Generated from jflex.
@@ -36,6 +40,8 @@ import java.util.List;
 %yylexthrow HCLParserException
 
 %{
+  Logger LOG = LoggerFactory.getLogger(HCLLexer.class);
+
   StringBuffer string = new StringBuffer();
   String endOfMultiLineSymbol;
   Boolean isMultiLineFirstNewLine = true;
@@ -55,7 +61,7 @@ import java.util.List;
 
   Symbol currentBlock = null;
   private Symbol hclBlock(List<String> blockNames) {
-    //System.out.println("Starting Block");
+    LOG.debug("Starting Block");
     HCLBlock block = new HCLBlock(blockNames,currentBlock,yyline,yycolumn-1,yychar-1);
     if(currentBlock == null) {
       elementStack.add(block);
@@ -67,7 +73,7 @@ import java.util.List;
   }
 
   private Symbol exitBlock() {
-    //System.out.println("Leaving Block");
+    LOG.debug("Leaving Block");
     Symbol result = null;
     if(currentBlock != null) {
       if(currentBlock.getParent() == null) {
@@ -79,7 +85,7 @@ import java.util.List;
   }
 
   private void startAttribute(String name) {
-        //System.out.println("Starting Attribute");
+    LOG.debug("Starting Attribute");
 
     HCLAttribute currentAttribute = new HCLAttribute(name,yyline,yycolumn,yychar);
     if(currentBlock == null) {

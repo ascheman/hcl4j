@@ -15,10 +15,15 @@
  */
 package com.bertramlabs.plugins.hcl4j.symbols;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class GenericSymbol implements Symbol {
+	private static Logger LOG = LoggerFactory.getLogger(GenericSymbol.class);
+
 	private Integer line;
 	private Integer column;
 	private Long position;
@@ -87,6 +92,8 @@ public abstract class GenericSymbol implements Symbol {
 	}
 
 	public GenericSymbol(String name,Integer line, Integer column,Long position) {
+		LOG.debug("Create new Symbol: '{}'", name);
+
 		this.name = name;
 		this.line = line;
 		this.column = column;
