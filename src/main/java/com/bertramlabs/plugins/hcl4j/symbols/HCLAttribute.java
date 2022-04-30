@@ -18,7 +18,7 @@ package com.bertramlabs.plugins.hcl4j.symbols;
 public class HCLAttribute  extends GenericSymbol {
 
 
-	public HCLAttribute(String name, Integer line, Integer column,Integer position) {
+	public HCLAttribute(String name, Integer line, Integer column,Long position) {
 		super(name,line,column,position);
 	}
 
