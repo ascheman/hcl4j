@@ -1,3 +1,5 @@
+[![Build Gradle Project](https://github.com/ascheman/hcl4j/actions/workflows/default-build.yml/badge.svg)](https://github.com/ascheman/hcl4j/actions/workflows/default-build.yml)
+
 HCL4j
 =====
 
