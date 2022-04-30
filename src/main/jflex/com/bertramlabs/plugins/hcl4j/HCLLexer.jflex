@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
   Symbol currentBlock = null;
   private Symbol hclBlock(List<String> blockNames) {
-    LOG.debug("Starting Block");
+    debug("Block", "Start");
     HCLBlock block = new HCLBlock(blockNames,currentBlock,yyline,yycolumn-1,yychar-1);
     if(currentBlock == null) {
       elementStack.add(block);
@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private Symbol exitBlock() {
-    LOG.debug("Leaving Block");
+    debug("Block", "Leave");
     Symbol result = null;
     if(currentBlock != null) {
       if(currentBlock.getParent() == null) {
@@ -85,7 +85,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private void startAttribute(String name) {
-    LOG.debug("Starting Attribute");
+    debug("Attribute", "Start");
 
     HCLAttribute currentAttribute = new HCLAttribute(name,yyline,yycolumn,yychar);
     if(currentBlock == null) {
@@ -120,6 +120,7 @@ import org.slf4j.LoggerFactory;
 
 
   private Symbol exitAttribute(Boolean force) {
+    debug("Attribute", "Leave");
 
     if(currentBlock == null) {
       yybegin(YYINITIAL);
@@ -156,7 +157,16 @@ import org.slf4j.LoggerFactory;
       yybegin(EVALUATEDEXPRESSION);
      }
 
+  private void debug(final String context, final String operation) {
+      debug(context, operation, null);
+  }
 
+  private void debug(final String context, final String operation, final String fmt, Object... values) {
+      if (LOG.isDebugEnabled()) {
+          String extendedFormat = "{}.{} (Line #{}, Column #{})" + (fmt == null ? "" : fmt);
+          LOG.debug(extendedFormat, context, operation, yyline, yycolumn, values);
+      }
+  }
 
 %}
 
