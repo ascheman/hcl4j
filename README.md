@@ -21,13 +21,13 @@ dependencies {
 }
 ```
 
-## Whats New
+## What's New
 
 * **0.4.0** Primitive Types are now appended into the Map.  These are of an extended `PrimitiveType` class. These Types include `StringPrimitiveType`, `NumberPrimitiveType`, `BooleanPrimitiveType`, `MapPrimitiveType`, and lastly `ListPrimitiveType` with a `subType` capable property.
 
 ## Usage
 
-Using the HCL Parser is fairly straightfoward. Most calls are still limited to use of the `HCLParser` class itself. There are several `parse` method helpers supporting both `File`, `InputStream`, `String`, and `Reader` as inputs.
+Using the HCL Parser is fairly straight forward. Most calls are still limited to use of the `HCLParser` class itself. There are several `parse` method helpers supporting both `File`, `InputStream`, `String`, and `Reader` as inputs.
 
 
 ```java
@@ -44,4 +44,8 @@ For More Information on the HCL Syntax Please see the project page:
 
 ## Things to be Done
 
-This plugin does not yet handle processing of the interpolated string syntax. While it does generate it into the result map, Parsing the values of the interpolation syntax needs to be done in a follow up step using some type of HCL runtime engine
+This plugin does not yet handle processing of the interpolated string syntax. While it does generate it into the result map, Parsing the values of the interpolation syntax needs to be done in a followup step using some type of HCL runtime engine
+
+## Development
+
+* If you want to improve this module and are using IntelliJ, you probably like to get syntax highlighting by the https://plugins.jetbrains.com/plugin/263-jflex-support[IntelliJ JFlex Plugin].

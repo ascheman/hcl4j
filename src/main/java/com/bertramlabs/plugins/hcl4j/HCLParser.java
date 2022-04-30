@@ -18,9 +18,21 @@ package com.bertramlabs.plugins.hcl4j;
 import com.bertramlabs.plugins.hcl4j.RuntimeSymbols.EvalSymbol;
 import com.bertramlabs.plugins.hcl4j.RuntimeSymbols.PrimitiveType;
 import com.bertramlabs.plugins.hcl4j.RuntimeSymbols.Variable;
-import com.bertramlabs.plugins.hcl4j.symbols.*;
+import com.bertramlabs.plugins.hcl4j.symbols.HCLArray;
+import com.bertramlabs.plugins.hcl4j.symbols.HCLAttribute;
+import com.bertramlabs.plugins.hcl4j.symbols.HCLBlock;
+import com.bertramlabs.plugins.hcl4j.symbols.HCLMap;
+import com.bertramlabs.plugins.hcl4j.symbols.HCLValue;
+import com.bertramlabs.plugins.hcl4j.symbols.Symbol;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -315,7 +327,7 @@ public class HCLParser {
 
 	private List<Symbol> getRootBlocks(Reader reader, Boolean ignoreParserExceptions) throws IOException, HCLParserException {
 		HCLLexer lexer = new HCLLexer(reader);
-		ArrayList<Symbol> rootBlocks;
+		List<Symbol> rootBlocks;
 
 		if(ignoreParserExceptions) {
 			try {

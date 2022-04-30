@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,9 @@ import com.bertramlabs.plugins.hcl4j.symbols.*;
 import com.bertramlabs.plugins.hcl4j.RuntimeSymbols.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.*;
 
 /**
- * This class is a HCL lexer Generated from jflex.
+ * This class is an HCL lexer Generated from jflex.
  * @author David Estes
  */
 
@@ -34,9 +33,7 @@ import java.io.*;
 %char
 %type Symbol
 
-%yylexthrow{
-HCLParserException
-%yylexthrow}
+%yylexthrow HCLParserException
 
 %{
   StringBuffer string = new StringBuffer();
@@ -48,8 +45,8 @@ HCLParserException
   int interpolatedCurleyBraceCounter = 0;
   Symbol currentValue;
   String currentMapKey;
-  public ArrayList<Symbol> elementStack = new ArrayList<Symbol>();
-  ArrayList<String> blockNames = null;
+  public List<Symbol> elementStack = new ArrayList<>();
+  List<String> blockNames = null;
   Boolean inMap = false;
   Boolean fromMapKey = false;
   HCLAttribute attribute;
@@ -126,9 +123,9 @@ HCLParserException
       return result;
     } else {
       attribute = null;
-    if((!(currentBlock instanceof HCLArray) && !(currentBlock instanceof HCLMap)) || force == true) {
-      exitBlock();
-    }
+      if((!(currentBlock instanceof HCLArray) && !(currentBlock instanceof HCLMap)) || force) {
+        exitBlock();
+      }
       if(currentBlock instanceof HCLBlock) {
         yybegin(HCLINBLOCK);
       } else if(currentBlock instanceof HCLArray) {
@@ -136,7 +133,7 @@ HCLParserException
       } else if(currentBlock instanceof HCLMap) {
         yybegin(HCLMAP);
       } else if(currentBlock instanceof HCLAttribute) {
-      exitAttribute();
+        exitAttribute();
       } else {
         yybegin(YYINITIAL);
       }
@@ -348,7 +345,7 @@ AssignmentExpression = [^]
 <HCLMAP> {
 
   {MapKeyDef}                    { yypushback(yylength()); yybegin(HCLMAPKEY); }
-  ,                { /* should probably process this but due to simplicity we dont need to */ }
+  ,                { /* should probably process this but due to simplicity we don't need to */ }
   \}                 { exitAttribute(true); }
     {WhiteSpace}                   { /* ignore */ }
 }
@@ -370,7 +367,7 @@ AssignmentExpression = [^]
 <HCLARRAY> {
     [^,\]\r\n\ \t]                 { yypushback(yylength()); yybegin(HCLATTRIBUTEVALUE); }
       \]                 { exitAttribute(true); }
-      ,                { /* should probably process this but due to simplicity we dont need to */ }
+      ,                { /* should probably process this but due to simplicity we don't need to */ }
       {Comment}                      { /* ignore */ }
       {WhiteSpace}                   { /* ignore */ }
 }
