@@ -108,6 +108,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private void startArray() {
+        debug("Array", "Start");
         HCLArray currentAttribute = new HCLArray(yyline,yycolumn,yychar);
             if(currentBlock == null) {
               elementStack.add(currentAttribute);
@@ -120,7 +121,7 @@ import org.slf4j.LoggerFactory;
 
 
   private Symbol exitAttribute(Boolean force) {
-    debug("Attribute", "Leave", "currentBlock = '{}'", currentBlock);
+    debug("Attribute", "Leave", "force = {}, currentBlock = '{}', attribute = '{}'", force, currentBlock, attribute);
 
     if(currentBlock == null) {
       yybegin(YYINITIAL);
@@ -153,6 +154,7 @@ import org.slf4j.LoggerFactory;
   }
 
      private void startEvalExpression() {
+        debug("EvalExpression", "Start");
         yypushback(yylength());
       yybegin(EVALUATEDEXPRESSION);
      }
@@ -163,8 +165,11 @@ import org.slf4j.LoggerFactory;
 
   private void debug(final String context, final String operation, final String fmt, Object... values) {
       if (LOG.isDebugEnabled()) {
-          String extendedFormat = "{}.{} (Line #{}, Column #{})" + (fmt == null ? "" : ": " + fmt);
-          LOG.debug(extendedFormat, context, operation, yyline, yycolumn, values);
+          String extendedFormat = "{} - {}.{} (Line #{}, Column #{}, Token = '{}')" + (fmt == null ? "" : ": " + fmt);
+          java.util.List<Object> args = new ArrayList<>(java.util.Arrays.asList(new Object[]{yystate(), context, operation, yyline, yycolumn, yytext()}));
+          // TODO is there a more efficient way than copying it back and forth between several arrays and lists?
+          args.addAll(java.util.Arrays.asList(values));
+          LOG.debug(extendedFormat, args.toArray());
       }
   }
 
@@ -414,12 +419,12 @@ AssignmentExpression = [^]
 }
 
 <EVALUATEDEXPRESSION> {
-  {IdentifierTree}           { currentBlock.appendChild(new Variable(yytext(),yyline,yycolumn,yychar)); exitAttribute();}
-  \}                             { yypushback(yylength()); exitAttribute(true);  }
-  {LineTerminator}               { exitAttribute(true);  }
-  {Comment}                      { /* ignore */ }
-  {WhiteSpace}                   { /* ignore */ }
-  [^}\n]+                        { /* ignore */ }
+  {IdentifierTree}               { debug ("EvalExpression", "IdentifierTree"); currentBlock.appendChild(new Variable(yytext(),yyline,yycolumn,yychar)); exitAttribute();}
+  \}                             { debug ("EvalExpression", "ClosingBracket"); yypushback(yylength()); exitAttribute(true);  }
+  {LineTerminator}               { debug ("EvalExpression", "LineTerminator"); exitAttribute(true);  }
+  {Comment}                      { debug ("EvalExpression", "Comment");  }
+  {WhiteSpace}                   { debug ("EvalExpression", "WhiteSpace");  }
+  [^}\n]+                        { debug ("EvalExpression", "Ignore"); }
 }
 
 <FORLOOPEXPRESSION> {
