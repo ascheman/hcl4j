@@ -50,8 +50,7 @@ service "my-service" {
     exprWithNegativeStart = -987 / 19
     isItTrueOrFalse = expr >= 5000
     disabled = !enabled
-
-//    negativePositive = -positive
+    negativePositive = -positive
     
     // Make sure this remains the last block for some time being (cf. README.md::KnownBugs)
     singleLineBlock { some = "value" }
@@ -90,7 +89,7 @@ service "my-service" {
 
 		def infoBlock = serviceBlock.children[1]
 		infoBlock.name == "info"
-		infoBlock.children.size() == 17
+		infoBlock.children.size() == 18
 		def name = infoBlock.children[0]
 		name.name == "name"
 		name.children[0].value == "my name"
@@ -108,7 +107,7 @@ service "my-service" {
 		positive.children[0].value == "1"
 		def negative = infoBlock.children[5]
 		negative.name == "negative"
-		negative.children[0].value == "-1"
+		negative.children[0].value == "1"
 		def values = infoBlock.children[6]
 		values.name == "values"
 		values.children[0].children.size() == 6
@@ -141,10 +140,10 @@ service "my-service" {
 		def disabled = infoBlock.children[15]
 		disabled.name == "disabled"
 		disabled.children.size() == 1
+		def negativePositive = infoBlock.children[16]
+		negativePositive.name == "negativePositive"
+		negativePositive.children.size() == 1
 
-//		def negativePositive = infoBlock.children[16]
-//		negativePositive.name == "negativePositive"
-//		negativePositive.children.size() == 1
 
 		def singleLineBlock = infoBlock.children[-1]
 		singleLineBlock.name == "singleLineBlock"

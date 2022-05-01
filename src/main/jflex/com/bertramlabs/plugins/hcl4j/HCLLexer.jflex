@@ -229,7 +229,7 @@ ListPrimitive = list | list*\(
 MapPrimitive = map | map*\(
 SetPrimitive = set | set*\(
 
-DigitValue = [0-9\.\-]+
+DigitValue = [0-9\.]+
 
 HCLAttributeName = [:jletter:] [a-zA-Z0-9\-\_]*
 HCLQuotedPropertyName = [\"] [^\r\n]+ [\"]
