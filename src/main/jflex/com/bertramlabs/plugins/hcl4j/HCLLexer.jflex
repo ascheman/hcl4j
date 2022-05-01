@@ -122,7 +122,6 @@ import org.slf4j.LoggerFactory;
 
   private Symbol exitAttribute(Boolean force) {
     debug("Attribute", "Leave", "force = {}, currentBlock = '{}', attribute = '{}'", force, currentBlock, attribute);
-
     if(currentBlock == null) {
       yybegin(YYINITIAL);
       Symbol result = attribute;
@@ -151,6 +150,26 @@ import org.slf4j.LoggerFactory;
 
   private Symbol exitAttribute() {
     return exitAttribute(false);
+  }
+
+  private Symbol exitAttributeSimple(Boolean force) {
+    debug("Attribute", "DEPRECATED-LEAVE", "force = {}, currentBlock = '{}', attribute = '{}'", force, currentBlock, attribute);
+      if(currentBlock instanceof HCLBlock) {
+        yybegin(HCLINBLOCK);
+      } else if(currentBlock instanceof HCLArray) {
+        yybegin(HCLARRAY);
+      } else if(currentBlock instanceof HCLMap) {
+        yybegin(HCLMAP);
+      } else if(currentBlock instanceof HCLAttribute) {
+        yybegin(HCLATTRIBUTEVALUE);
+      } else {
+        yybegin(YYINITIAL);
+      }
+    return null;
+  }
+
+  private Symbol exitAttributeSimple() {
+    return exitAttributeSimple(false);
   }
 
      private void startEvalExpression() {
