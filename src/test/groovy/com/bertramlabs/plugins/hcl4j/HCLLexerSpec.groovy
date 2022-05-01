@@ -51,11 +51,11 @@ service "my-service" {
     isItTrueOrFalse = expr >= 5000
     disabled = !enabled
     negativePositive = -positive
+    exp = 1.5e-3
     
     // Make sure this remains the last block for some time being (cf. README.md::KnownBugs)
     singleLineBlock { some = "value" }
 
-//    exp = 1.5e-3
 //    # The conditional is split to multiple lines on purpose!
 //    conditional = enabled 
 //    ? "yes" : "no"
@@ -89,7 +89,7 @@ service "my-service" {
 
 		def infoBlock = serviceBlock.children[1]
 		infoBlock.name == "info"
-		infoBlock.children.size() == 18
+		infoBlock.children.size() == 19
 		def name = infoBlock.children[0]
 		name.name == "name"
 		name.children[0].value == "my name"
@@ -143,7 +143,9 @@ service "my-service" {
 		def negativePositive = infoBlock.children[16]
 		negativePositive.name == "negativePositive"
 		negativePositive.children.size() == 1
-
+		def exp = infoBlock.children[17]
+		exp.name == "exp"
+		exp.children.size() == 1
 
 		def singleLineBlock = infoBlock.children[-1]
 		singleLineBlock.name == "singleLineBlock"
