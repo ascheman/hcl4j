@@ -254,7 +254,16 @@ MLineModifierStart = [\<] [\<] [\-\~] {HCLAttributeName}
 MLineStart = [\<] [\<] [\ ]? {HCLAttributeName}
 
 
+Operation = {unaryOp} | {binaryOp}
+prefixOperator = "!" | "-"
+unaryOp = {prefixOperator} {ExprTerm}
+binaryOp = {ExprTerm} {binaryOperator} {ExprTerm}
+binaryOperator = {compareOperator} | {arithmeticOperator} | {logicOperator}
+compareOperator = "==" | "!=" | "<" | ">" | "<=" | ">="
+arithmeticOperator = "+" | "-" | "*" | "/" | "%"
+logicOperator = "&&" | "||" | "!"
 ExprTerm = {True} | {False} | {Null} | {DigitValue} | {Identifier} | {FunctionCall}
+Conditional = {ExprTerm} {WhiteSpace}* "?" {WhiteSpace}* {ExprTerm} {WhiteSpace}* : {WhiteSpace}* {ExprTerm}
 Expression = {ExprTerm} | {Operation} | {Conditional}
 /*For Expression*/
 ForObjExpr = \{ [\n\t\f\r ]* {ForIntro}
@@ -466,7 +475,7 @@ AssignmentExpression = [^]
 
 <HCLATTRIBUTEVALUE> {
   {LineTerminator}        { debug ("HclAttributeValue", "LineTerminator"); exitAttribute(true); }
-  ,                { /* should probably process this but due to simplicity we don't need to */ }
+  ,                       { /* should probably process this but due to simplicity we don't need to */ }
   {ForExpr}               { debug ("HclAttributeValue", "ForExpr"); yybegin(FORLOOPEXPRESSION); yypushback(yylength()); }
   \[                      { debug ("HclAttributeValue", "StartArray"); startArray();/* process an array */ }
   \]                      { debug ("HclAttributeValue", "LeaveArray"); exitAttribute(true); }
@@ -484,14 +493,16 @@ AssignmentExpression = [^]
   {NumberPrimitive}       { debug ("HclAttributeValue", "NumberPrimitive"); currentBlock.appendChild(new NumberPrimitiveType(yyline,yycolumn,yychar)); exitAttributeSimple();}
   {BooleanPrimitive}      { debug ("HclAttributeValue", "BooleanPrimitive"); currentBlock.appendChild(new BooleanPrimitiveType(yyline,yycolumn,yychar)); exitAttributeSimple();}
   {ListPrimitive}         { subTypePrimitiveType = new ListPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
-  {SetPrimitive}         { subTypePrimitiveType = new SetPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
-  {MapPrimitive}         { subTypePrimitiveType = new MapPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
-  {IdentifierTree}          { debug ("HclAttributeValue", "IdentifierTree"); currentBlock.appendChild(new Variable(yytext(),yyline,yycolumn,yychar)); } // exitAttributeSimple(); }
-  {Comment}                      { /* ignore */ }
-  {WhiteSpace}                   { /* ignore */ }
+  {SetPrimitive}          { subTypePrimitiveType = new SetPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
+  {MapPrimitive}          { subTypePrimitiveType = new MapPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
+  {IdentifierTree}        { debug ("HclAttributeValue", "IdentifierTree"); currentBlock.appendChild(new Variable(yytext(),yyline,yycolumn,yychar)); } // exitAttributeSimple(); }
+  {Comment}               { /* ignore */ }
+  {WhiteSpace}            { /* ignore */ }
   \?                      { debug ("HclAttributeValue", "Conditional (pre)"); } // yybegin(HCLATTRIBUTEVALUE);yypushback(yylength()); }
   \:                      { debug ("HclAttributeValue", "Conditional (post)"); } // yybegin(HCLATTRIBUTEVALUE);yypushback(yylength()); }
-  [()\+\*\\\-]            { /* ignore */ }
+  [()]                    { debug ("HclBlock", "Ignore Parens");  }
+  {prefixOperator}        { debug ("HclAttributeValue", "Prefix"); }
+  {binaryOperator}        { debug ("HclAttributeValue", "Infix"); }
 
 }
 

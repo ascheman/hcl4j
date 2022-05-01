@@ -47,14 +47,16 @@ service "my-service" {
     expr = 2345 + 321
     exprWithVar = 57 + negative * 5432
     exprWithParen = (-2109 + 3012)
+    exprWithNegativeStart = -987 / 19
+    isItTrueOrFalse = expr >= 5000
+    disabled = !enabled
+
+//    negativePositive = -positive
     
     // Make sure this remains the last block for some time being (cf. README.md::KnownBugs)
     singleLineBlock { some = "value" }
 
 //    exp = 1.5e-3
-//	  negativePositive = -positive
-//	  disabled = !enabled
-//    exprWithNegativeStart = -987 / 19
 //    # The conditional is split to multiple lines on purpose!
 //    conditional = enabled 
 //    ? "yes" : "no"
@@ -88,7 +90,7 @@ service "my-service" {
 
 		def infoBlock = serviceBlock.children[1]
 		infoBlock.name == "info"
-		infoBlock.children.size() == 14
+		infoBlock.children.size() == 17
 		def name = infoBlock.children[0]
 		name.name == "name"
 		name.children[0].value == "my name"
@@ -130,6 +132,19 @@ service "my-service" {
 		def exprWithParen = infoBlock.children[12]
 		exprWithParen.name == "exprWithParen"
 		exprWithParen.children.size() == 2
+		def exprWithNegativeStart = infoBlock.children[13]
+		exprWithNegativeStart.name == "exprWithNegativeStart"
+		exprWithNegativeStart.children.size() == 2
+		def isItTrueOrFalse = infoBlock.children[14]
+		isItTrueOrFalse.name == "isItTrueOrFalse"
+		isItTrueOrFalse.children.size() == 2
+		def disabled = infoBlock.children[15]
+		disabled.name == "disabled"
+		disabled.children.size() == 1
+
+//		def negativePositive = infoBlock.children[16]
+//		negativePositive.name == "negativePositive"
+//		negativePositive.children.size() == 1
 
 		def singleLineBlock = infoBlock.children[-1]
 		singleLineBlock.name == "singleLineBlock"
