@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
   Symbol currentBlock = null;
   private Symbol hclBlock(List<String> blockNames) {
-    debug("Block", "Start", "blockNames = '{}'", blockNames);
+    debug("Block", "Start", "currentBlock = '{}', parent = '{}', blockNames = '{}'", currentBlock, null == currentBlock ? "NONE" : currentBlock.getParent(), blockNames);
     HCLBlock block = new HCLBlock(blockNames,currentBlock,yyline,yycolumn-1,yychar-1);
     if(currentBlock == null) {
       elementStack.add(block);
@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private Symbol exitBlock() {
-    debug("Block", "Leave", "currentBlock = '{}'", currentBlock);
+    debug("Block", "Leave", "currentBlock = '{}', parent = '{}'", currentBlock, null == currentBlock ? "NONE" : currentBlock.getParent());
     Symbol result = null;
     if(currentBlock != null) {
       if(currentBlock.getParent() == null) {
