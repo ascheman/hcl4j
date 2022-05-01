@@ -324,7 +324,24 @@ AssignmentExpression = [^]
 }
 <STRINGDOUBLE> {
 
-  \"                             { if(blockNames != null) { blockNames.add(string.toString());  yybegin(HCLBLOCKATTRIBUTES); } else if(currentBlock != null && currentBlock instanceof HCLMap && currentMapKey == null) { currentMapKey = string.toString() ; yybegin(HCLMAPKEYDEF); } else if (stringAttributeName) { stringAttributeName = false ; yybegin(HCLATTRIBUTE); startAttribute(string.toString());} else if(currentBlock != null) { currentBlock.appendChild(new HCLValue("string",string.toString(),yyline,yycolumn,yychar));  exitAttribute(); } else { throw new HCLParserException("String block found outside of block or attribute assignment."); } }
+  \"                             {
+    debug ("StringDouble", "EndOfString");
+    if(blockNames != null) {
+        blockNames.add(string.toString());
+        yybegin(HCLBLOCKATTRIBUTES);
+    } else if(currentBlock != null && currentBlock instanceof HCLMap && currentMapKey == null) {
+        currentMapKey = string.toString() ;
+        yybegin(HCLMAPKEYDEF);
+    } else if (stringAttributeName) {
+        stringAttributeName = false;
+        yybegin(HCLATTRIBUTE); startAttribute(string.toString());
+    } else if(currentBlock != null) {
+        currentBlock.appendChild(new HCLValue("string",string.toString(),yyline,yycolumn,yychar));
+        exitAttributeSimple();
+    } else {
+        throw new HCLParserException("String block found outside of block or attribute assignment.");
+    }
+  }
   \\\"                           { string.append('\"'); }
   {EscapedInterpolation}         { string.append( yytext() );}
   {InterpolationSyntax}          { string.append('$');yypushback(yylength()-1); yybegin(STRINGINTERPOLATED); }
@@ -335,13 +352,54 @@ AssignmentExpression = [^]
 
 <STRINGSINGLE> {
   [^\n\r\'\\]+                   { string.append( yytext() ); }
-  \'                             { if(blockNames != null) { blockNames.add(string.toString());  yybegin(HCLBLOCKATTRIBUTES); } else if(currentBlock != null && currentBlock instanceof HCLMap && currentMapKey == null) { currentMapKey = string.toString() ; yybegin(HCLMAPKEYDEF); } else if (stringAttributeName) { stringAttributeName = false ; yybegin(HCLATTRIBUTE); startAttribute(string.toString());} else if(currentBlock != null) { currentBlock.appendChild(new HCLValue("string",string.toString(),yyline,yycolumn,yychar));  exitAttribute(); } else { throw new HCLParserException("String block found outside of block or attribute assignment."); } }
+  \'                             {
+    debug ("StringSingle", "EndOfString");
+    if(blockNames != null) {
+        blockNames.add(string.toString());
+        yybegin(HCLBLOCKATTRIBUTES);
+    } else if(currentBlock != null && currentBlock instanceof HCLMap && currentMapKey == null) {
+        currentMapKey = string.toString();
+        yybegin(HCLMAPKEYDEF);
+    } else if (stringAttributeName) {
+        stringAttributeName = false;
+        yybegin(HCLATTRIBUTE);
+        startAttribute(string.toString());
+    } else if(currentBlock != null) {
+        currentBlock.appendChild(new HCLValue("string",string.toString(),yyline,yycolumn,yychar));
+        exitAttributeSimple();
+    } else {
+        throw new HCLParserException("String block found outside of block or attribute assignment.");
+    }
+  }
   \\'                            { string.append('\''); }
 }
 
 <MULTILINESTRING> {
-  {LineTerminator}             { if(isMultiLineFirstNewLine) {isMultiLineFirstNewLine = false; } else {string.append( yytext() );} }
-  [^\n\r]+                   { if(yytext().trim().equals(endOfMultiLineSymbol)) { endOfMultiLineSymbol = null; if(blockNames != null) { blockNames.add(string.toString());  yybegin(HCLBLOCKATTRIBUTES); } else if(attribute != null) { attribute.appendChild(new HCLValue("string",string.toString(),yyline,yycolumn,yychar)) ; exitAttribute(); } else { throw new HCLParserException("String block found outside of block or attribute assignment."); }} else {string.append( isMultilineModified ? yytext().trim() : yytext() );} }
+  {LineTerminator}             {
+    debug ("MultiLineString", "LineTerminator");
+    if(isMultiLineFirstNewLine) {
+        isMultiLineFirstNewLine = false;
+    } else {
+        string.append( yytext() );
+    }
+  }
+  [^\n\r]+                   {
+    debug ("MultiLineString", "Remainder");
+    if(yytext().trim().equals(endOfMultiLineSymbol)) {
+        endOfMultiLineSymbol = null;
+        if(blockNames != null) {
+            blockNames.add(string.toString());
+            yybegin(HCLBLOCKATTRIBUTES);
+        } else if(attribute != null) {
+            attribute.appendChild(new HCLValue("string",string.toString(),yyline,yycolumn,yychar)) ;
+            exitAttributeSimple();
+        } else {
+            throw new HCLParserException("String block found outside of block or attribute assignment.");
+        }
+    } else {
+        string.append( isMultilineModified ? yytext().trim() : yytext() );
+    }
+  }
 }
 
 <STRINGINTERPOLATED> {
