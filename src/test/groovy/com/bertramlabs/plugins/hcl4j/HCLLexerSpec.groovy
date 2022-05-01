@@ -30,7 +30,7 @@ variables {
   test = "test value"
 }
 
-service "my service" {
+service "my-service" {
   description = "my description"
   info {
     name = "my name"
@@ -42,6 +42,7 @@ service "my service" {
     negative = -1
     values = [ "hi", "mid", false, 1234, "lo", true]
     nil = null
+    assignedVariable = my-service.info.maxMemory
     simpleConditional = enabled ? "yes" : "no"
 
 //    exp = 1.5e-3
@@ -77,13 +78,14 @@ service "my service" {
 		rootBlocks[1].children.size() == 2
 		def serviceBlock = rootBlocks[1]
 		serviceBlock.name == "service"
-		serviceBlock.blockNames == ["service", "my service"]
+		serviceBlock.blockNames == ["service", "my-service"]
 		def description = serviceBlock.children[0]
 		description.name == "description"
 		description.children[0].value == "my description"
+
 		def infoBlock = serviceBlock.children[1]
 		infoBlock.name == "info"
-		infoBlock.children.size() == 9
+		infoBlock.children.size() == 10
 		def name = infoBlock.children[0]
 		name.name == "name"
 		name.children[0].value == "my name"
@@ -109,7 +111,10 @@ service "my service" {
 		def nil = infoBlock.children[7]
 		nil.name == "nil"
 		nil.children[0].value == null
-		def simpleConditional = infoBlock.children[8]
+		def assignedVariable = infoBlock.children[8]
+		assignedVariable.name == "assignedVariable"
+		assignedVariable.children[0].name == "my-service.info.maxMemory"
+		def simpleConditional = infoBlock.children[9]
 		simpleConditional.name == "simpleConditional"
 //		simpleConditional.children.size() == 3
 	}
