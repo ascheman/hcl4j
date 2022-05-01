@@ -49,3 +49,7 @@ This plugin does not yet handle processing of the interpolated string syntax. Wh
 ## Development
 
 * If you want to improve this module and are using IntelliJ, you probably like to get syntax highlighting by the https://plugins.jetbrains.com/plugin/263-jflex-support[IntelliJ JFlex Plugin].
+
+## Known Bugs
+
+* If a block is completely on one line (cf. TODOs in HCLParserSpec, it cannot be parsed correctly)

@@ -44,6 +44,7 @@ service "my-service" {
     nil = null
     assignedVariable = my-service.info.maxMemory
     simpleConditional = enabled ? "yes" : "no"
+    singleLineBlock { some = "value" }
 
 //    exp = 1.5e-3
 //	negativePositive = -positive
@@ -85,7 +86,7 @@ service "my-service" {
 
 		def infoBlock = serviceBlock.children[1]
 		infoBlock.name == "info"
-		infoBlock.children.size() == 10
+		infoBlock.children.size() == 11
 		def name = infoBlock.children[0]
 		name.name == "name"
 		name.children[0].value == "my name"
@@ -116,7 +117,10 @@ service "my-service" {
 		assignedVariable.children[0].name == "my-service.info.maxMemory"
 		def simpleConditional = infoBlock.children[9]
 		simpleConditional.name == "simpleConditional"
-//		simpleConditional.children.size() == 3
+		simpleConditional.children.size() == 3
+		def singleLineBlock = infoBlock.children[10]
+		singleLineBlock.name == "singleLineBlock"
+		singleLineBlock.children.size() == 1
 	}
 
 }

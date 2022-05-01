@@ -172,12 +172,6 @@ import org.slf4j.LoggerFactory;
     return exitAttributeSimple(false);
   }
 
-     private void startEvalExpression() {
-        debug("EvalExpression", "Start");
-        yypushback(yylength());
-      yybegin(EVALUATEDEXPRESSION);
-     }
-
   private void debug(final String context, final String operation) {
       debug(context, operation, null);
   }
@@ -223,7 +217,6 @@ FunctionCall = {Identifier} "(" {Arguments}? ")"
 
 ArrayModifier = [:jletter:] [a-zA-Z0-9\-\_]*\[
 Property = [:jletter:] [a-zA-Z0-9\-\_]*\.
-EvaluatedExpression = [\(] | {IdentifierTree} | {ArrayModifier} | {Function} | {Identifier}
 
 True = true
 False = false
@@ -295,7 +288,6 @@ AssignmentExpression = [^]
 %state HCLMAPVALUE
 %state STRINGINTERPOLATED
 %state MULTILINESTRING
-%state EVALUATEDEXPRESSION
 %state FORLOOPEXPRESSION
 %state FORTUPLEEXPRESSION
 %state FOROBJECTEXPRESSION
@@ -417,7 +409,7 @@ AssignmentExpression = [^]
 
 <HCLBLOCKATTRIBUTES> {
   \{                             { curleyBraceCounter++ ; hclBlock(blockNames) ; blockNames = null ; yybegin(HCLINBLOCK); }
-  \"                             {yybegin(STRINGDOUBLE); string.setLength(0);}
+  \"                             { debug ("HclBlockAttributes", "StringStart"); yybegin(STRINGDOUBLE); string.setLength(0);}
   {WhiteSpace}                   { /* ignore */ }
 }
 
@@ -427,6 +419,7 @@ AssignmentExpression = [^]
   /* comments */
   {Comment}                      { /* ignore */ }
   \}                 { exitAttribute();}
+  \]                 { exitAttribute(true); }
   /* whitespace */
   {WhiteSpace}                   { /* ignore */ }
 }
@@ -472,36 +465,34 @@ AssignmentExpression = [^]
 
 
 <HCLATTRIBUTEVALUE> {
-  {ForExpr}               { yybegin(FORLOOPEXPRESSION); yypushback(yylength()); }
-  \[                      { startArray();/* process an array */ }
-  {MapBlockStart}         { startMap(); yypushback(yylength()-1) ; yybegin(HCLMAP);}
-  \{                      {  blockNames = new ArrayList<String>(); blockNames.add(currentBlock.getName()); curleyBraceCounter++ ; hclBlock(blockNames) ; blockNames = null ; attribute = null ; yybegin(HCLINBLOCK); }
-  \"                      {yybegin(STRINGDOUBLE); string.setLength(0); }
-  {MLineModifierStart}    {yybegin(MULTILINESTRING) ; isMultiLineFirstNewLine = true ;isMultilineModified = true; string.setLength(0) ; endOfMultiLineSymbol = yytext().substring(3);}
-  {MLineStart}            {yybegin(MULTILINESTRING) ; isMultiLineFirstNewLine = true ;isMultilineModified = true; string.setLength(0) ; endOfMultiLineSymbol = yytext().substring(2).trim();}
-  {True}                  { currentBlock.appendChild(new HCLValue("boolean","true",yyline,yycolumn,yychar)) ; exitAttribute(); }
-  {False}                 { currentBlock.appendChild(new HCLValue("boolean","false",yyline,yycolumn,yychar)) ; exitAttribute(); }
-  {Null}                  { currentBlock.appendChild(new HCLValue("null",null,yyline,yycolumn,yychar)) ; exitAttribute(); }
-  {DigitValue}            { currentBlock.appendChild(new HCLValue("number",yytext(),yyline,yycolumn,yychar)) ; exitAttribute(); }
-  {StringPrimitive}       { currentBlock.appendChild(new StringPrimitiveType(yyline,yycolumn,yychar)); exitAttribute();}
-  {NumberPrimitive}       { currentBlock.appendChild(new NumberPrimitiveType(yyline,yycolumn,yychar)); exitAttribute();}
-  {BooleanPrimitive}      { currentBlock.appendChild(new BooleanPrimitiveType(yyline,yycolumn,yychar)); exitAttribute();}
+  {LineTerminator}        { debug ("HclAttributeValue", "LineTerminator"); exitAttribute(true); }
+  ,                { /* should probably process this but due to simplicity we don't need to */ }
+  {ForExpr}               { debug ("HclAttributeValue", "ForExpr"); yybegin(FORLOOPEXPRESSION); yypushback(yylength()); }
+  \[                      { debug ("HclAttributeValue", "StartArray"); startArray();/* process an array */ }
+  \]                      { debug ("HclAttributeValue", "LeaveArray"); exitAttribute(true); }
+  {MapBlockStart}         { debug ("HclAttributeValue", "MapBlockStart"); startMap(); yypushback(yylength()-1) ; yybegin(HCLMAP);}
+  \{                      { debug ("HclAttributeValue", "BlockStart");  blockNames = new ArrayList<String>(); blockNames.add(currentBlock.getName()); curleyBraceCounter++ ;   hclBlock(blockNames) ; blockNames = null ; attribute = null ; yybegin(HCLINBLOCK); }
+  \}                      { debug ("HclAttributeValue", "LeaveBlock"); exitAttribute(true); }
+  \"                      { debug ("HclAttributeValue", "String"); yybegin(STRINGDOUBLE); string.setLength(0); }
+  {MLineModifierStart}    { debug ("HclAttributeValue", "MLineModifierStart"); yybegin(MULTILINESTRING) ; isMultiLineFirstNewLine = true ;isMultilineModified = true; string.setLength(0) ; endOfMultiLineSymbol = yytext().substring(3);}
+  {MLineStart}            { debug ("HclAttributeValue", "MLineStart"); yybegin(MULTILINESTRING) ; isMultiLineFirstNewLine = true ;isMultilineModified = true; string.setLength(0) ; endOfMultiLineSymbol = yytext().substring(2).trim();}
+  {True}                  { debug ("HclAttributeValue", "True"); currentBlock.appendChild(new HCLValue("boolean","true",yyline,yycolumn,yychar)) ; exitAttributeSimple(); }
+  {False}                 { debug ("HclAttributeValue", "False"); currentBlock.appendChild(new HCLValue("boolean","false",yyline,yycolumn,yychar)) ; exitAttributeSimple(); }
+  {Null}                  { debug ("HclAttributeValue", "Null"); currentBlock.appendChild(new HCLValue("null",null,yyline,yycolumn,yychar)) ; exitAttributeSimple(); }
+  {DigitValue}            { debug ("HclAttributeValue", "DigitValue"); currentBlock.appendChild(new HCLValue("number",yytext(),yyline,yycolumn,yychar)) ; exitAttributeSimple(); }
+  {StringPrimitive}       { debug ("HclAttributeValue", "StringPrimitive"); currentBlock.appendChild(new StringPrimitiveType(yyline,yycolumn,yychar)); exitAttributeSimple();}
+  {NumberPrimitive}       { debug ("HclAttributeValue", "NumberPrimitive"); currentBlock.appendChild(new NumberPrimitiveType(yyline,yycolumn,yychar)); exitAttributeSimple();}
+  {BooleanPrimitive}      { debug ("HclAttributeValue", "BooleanPrimitive"); currentBlock.appendChild(new BooleanPrimitiveType(yyline,yycolumn,yychar)); exitAttributeSimple();}
   {ListPrimitive}         { subTypePrimitiveType = new ListPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
   {SetPrimitive}         { subTypePrimitiveType = new SetPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
   {MapPrimitive}         { subTypePrimitiveType = new MapPrimitiveType(null,yyline,yycolumn,yychar); currentBlock.appendChild(subTypePrimitiveType); yybegin(SUBTYPEPRIMITIVETYPE); }
-  {EvaluatedExpression}          { startEvalExpression(); }
+  {IdentifierTree}          { debug ("HclAttributeValue", "IdentifierTree"); currentBlock.appendChild(new Variable(yytext(),yyline,yycolumn,yychar)); } // exitAttributeSimple(); }
   {Comment}                      { /* ignore */ }
   {WhiteSpace}                   { /* ignore */ }
+  \?                      { debug ("HclAttributeValue", "Conditional (pre)"); } // yybegin(HCLATTRIBUTEVALUE);yypushback(yylength()); }
+  \:                      { debug ("HclAttributeValue", "Conditional (post)"); } // yybegin(HCLATTRIBUTEVALUE);yypushback(yylength()); }
+  [()\+\*\\\-]            { /* ignore */ }
 
-}
-
-<EVALUATEDEXPRESSION> {
-  {IdentifierTree}               { debug ("EvalExpression", "IdentifierTree"); currentBlock.appendChild(new Variable(yytext(),yyline,yycolumn,yychar)); exitAttribute();}
-  \}                             { debug ("EvalExpression", "ClosingBracket"); yypushback(yylength()); exitAttribute(true);  }
-  {LineTerminator}               { debug ("EvalExpression", "LineTerminator"); exitAttribute(true);  }
-  {Comment}                      { debug ("EvalExpression", "Comment");  }
-  {WhiteSpace}                   { debug ("EvalExpression", "WhiteSpace");  }
-  [^}\n]+                        { debug ("EvalExpression", "Ignore"); }
 }
 
 <FORLOOPEXPRESSION> {
