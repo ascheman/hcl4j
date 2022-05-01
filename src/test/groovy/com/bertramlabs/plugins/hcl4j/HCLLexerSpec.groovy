@@ -44,14 +44,16 @@ service "my-service" {
     nil = null
     assignedVariable = my-service.info.maxMemory
     simpleConditional = enabled ? "yes" : "no"
+    expr = 2345 + 321
+    exprWithVar = 57 + negative * 5432
+    exprWithParen = (-2109 + 3012)
+    
+    // Make sure this remains the last block for some time being (cf. README.md::KnownBugs)
     singleLineBlock { some = "value" }
 
 //    exp = 1.5e-3
-//	negativePositive = -positive
-//	disabled = !enabled
-//    expr = 2345 + 321
-//    exprWithVar = 57 + negative * 5432
-//    exprWithParen = (-2109 + 3012)
+//	  negativePositive = -positive
+//	  disabled = !enabled
 //    exprWithNegativeStart = -987 / 19
 //    # The conditional is split to multiple lines on purpose!
 //    conditional = enabled 
@@ -86,7 +88,7 @@ service "my-service" {
 
 		def infoBlock = serviceBlock.children[1]
 		infoBlock.name == "info"
-		infoBlock.children.size() == 11
+		infoBlock.children.size() == 14
 		def name = infoBlock.children[0]
 		name.name == "name"
 		name.children[0].value == "my name"
@@ -118,7 +120,18 @@ service "my-service" {
 		def simpleConditional = infoBlock.children[9]
 		simpleConditional.name == "simpleConditional"
 		simpleConditional.children.size() == 3
-		def singleLineBlock = infoBlock.children[10]
+		def expr = infoBlock.children[10]
+		expr.name == "expr"
+		expr.children.size() == 2
+		def exprWithVar = infoBlock.children[11]
+		exprWithVar.name == "exprWithVar"
+		exprWithVar.children.size() == 3
+		exprWithVar.children[1].name == "negative"
+		def exprWithParen = infoBlock.children[12]
+		exprWithParen.name == "exprWithParen"
+		exprWithParen.children.size() == 2
+
+		def singleLineBlock = infoBlock.children[-1]
 		singleLineBlock.name == "singleLineBlock"
 		singleLineBlock.children.size() == 1
 	}
